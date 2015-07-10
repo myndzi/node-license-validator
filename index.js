@@ -14,23 +14,40 @@ function stringsort(a, b) {
 }
 
 function validateArgs(rootDir, opts, cb) { // jshint maxcomplexity: 12
-    if (typeof rootDir !== 'string') { throw new Error('nlf-validator: invalid rootDir: ' + rootDir); }
+    function fail(err) {
+        if (typeof cb === 'function') { cb(err); }
+        else { throw err; }
+        return true;
+    }
+    if (typeof rootDir !== 'string') {
+        return fail(Error('nlf-validator: invalid rootDir: ' + rootDir));
+    }
+    
     try {
         var stat = fs.statSync(rootDir);
-        if (!stat.isDirectory()) { throw new Error('nlf-validator: not a directory: ' + rootDir); }
+        if (!stat.isDirectory()) {
+            return fail(new Error('nlf-validator: not a directory: ' + rootDir));
+        }
     } catch (e) {
-        throw new Error('nlf-validator: invalid rootDir: ' + rootDir + ': ' + e.message);
+        return fail(new Error('nlf-validator: invalid rootDir: ' + rootDir + ': ' + e.message));
     }
-    if (!opts || typeof opts !== 'object') { throw new Error('nlf-validator: invalid options: ' + opts); }
+    
+    if (!opts || typeof opts !== 'object') {
+        return fail(new Error('nlf-validator: invalid options: ' + opts));
+    }
+    
     if ( (!Array.isArray(opts.licenses) ? 0 : opts.licenses.length) +
          (!Array.isArray(opts.packages) ? 0 : opts.packages.length) === 0 )
     {
-        throw new Error('nlf-validator: no licenses or packages specified');
+        return fail(new Error('nlf-validator: no licenses or packages specified'));
     }
-    if (!cb || typeof cb !== 'function') { throw new Error('nlf-validator: no callback specified'); }
+    
+    if (!cb || typeof cb !== 'function') {
+        return fail(new Error('nlf-validator: no callback specified'));
+    }
 }
 module.exports = function (rootDir, opts, cb) {
-    validateArgs(rootDir, opts, cb);
+    if (validateArgs(rootDir, opts, cb)) { return; }
     
     var nlf = opts.__nlf || require('nlf');
     

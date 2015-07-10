@@ -1,5 +1,5 @@
 {
-  "name": "nlf-validator",
+  "name": "node-license-validator",
   "version": "1.0.0",
   "description": "Validate licenses used by your project using NLF",
   "main": "index.js",
@@ -8,9 +8,12 @@
     "report": "istanbul cover -x test.js -x node_modules node_modules/.bin/_mocha -- -u bdd -R spec --bail test.js;jshint index.js cli.js",
     "lint": "jshint index.js cli.js"
   },
+  "bin" :{
+    "node-license-validator": "./cli.js"
+  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/myndzi/nlf-validator.git"
+    "url": "git+https://github.com/myndzi/node-license-validator.git"
   },
   "keywords": [
     "nlf",
@@ -21,9 +24,9 @@
   "author": "Kris Reeves",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/myndzi/nlf-validator/issues"
+    "url": "https://github.com/myndzi/node-license-validator/issues"
   },
-  "homepage": "https://github.com/myndzi/nlf-validator#readme",
+  "homepage": "https://github.com/myndzi/node-license-validator#readme",
   "dependencies": {
     "nlf": "^1.3.1",
     "npm-package-arg": "^4.0.1",

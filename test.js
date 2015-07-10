@@ -171,6 +171,11 @@ describe('NLF-validator', function () {
         it('should throw with no callback', function () {
             (function () { validate(__dirname, { licenses: [ 'foo' ] }); }).should.throw(/no callback specified/);
         });
+        it('should call the callback with errors if one exists', function () {
+            validate(null, null, function (err) {
+                err.should.match(/invalid rootDir/);
+            });
+        });
         it('should pass on errors from nlf.find', function () {
             var err = new Error();
             

@@ -50,8 +50,9 @@ require('./index')(DIR, {
     packages: argv['allow-packages'] || [ ]
 }, function (err, res) {
     if (err) {
-        console.error(err.stack || err.message || err);
-        process.exit(3);
+        console.error('\nError: %s\n', err.message);
+        yargs.showHelp();
+        process.exit(2);
     }
     
     var LICENSES = res.licenses,
