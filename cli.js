@@ -68,7 +68,7 @@ require('./index')(DIR, {
     
     if (QUIET) { return; }
     
-    log('Identified licenses: %s', Object.keys(LICENSES).sort(stringsort).join(', '));
+    log('Identified licenses: %s', LICENSES);
     
     if (VERBOSE) {
         Object.keys(PACKAGES)

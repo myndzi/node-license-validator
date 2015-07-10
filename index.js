@@ -1,16 +1,53 @@
 'use strict';
 
-var nlf = require('nlf'),
+var fs = require('fs'),
     npa = require('npm-package-arg'),
-    semver = require('semver');
+    spdx = require('spdx'),
+    semver = require('semver'),
+    format = require('util').format;
 
+/* istanbul ignore next */
+function stringsort(a, b) {
+    if (a < b) { return -1; }
+    if (a > b) { return 1; }
+    return 0;
+}
+
+function validateArgs(rootDir, opts, cb) { // jshint maxcomplexity: 12
+    if (typeof rootDir !== 'string') { throw new Error('nlf-validator: invalid rootDir: ' + rootDir); }
+    try {
+        var stat = fs.statSync(rootDir);
+        if (!stat.isDirectory()) { throw new Error('nlf-validator: not a directory: ' + rootDir); }
+    } catch (e) {
+        throw new Error('nlf-validator: invalid rootDir: ' + rootDir + ': ' + e.message);
+    }
+    if (!opts || typeof opts !== 'object') { throw new Error('nlf-validator: invalid options: ' + opts); }
+    if ( (!Array.isArray(opts.licenses) ? 0 : opts.licenses.length) +
+         (!Array.isArray(opts.packages) ? 0 : opts.packages.length) === 0 )
+    {
+        throw new Error('nlf-validator: no licenses or packages specified');
+    }
+    if (!cb || typeof cb !== 'function') { throw new Error('nlf-validator: no callback specified'); }
+}
 module.exports = function (rootDir, opts, cb) {
-    opts = opts || { };
+    validateArgs(rootDir, opts, cb);
+    
+    var nlf = opts.__nlf || require('nlf');
     
     var whitelistLicenses = opts.licenses.reduce(function (acc, cur) {
         acc[cur.toLowerCase()] = cur;
         return acc;
     }, { });
+    
+    // not all of the licenses we specify might be valid spdx identifiers
+    // but when we are comparing licenses, package.json may specify spdx expressions
+    // so we need to construct something to compare against spdx expressions
+    // our comparison must contain only valid identifiers
+    
+    // we build a string like (MIT OR ISC OR JSON OR BSD-3-Clause) with all the licenses
+    // we have deemed acceptable; if a package has an 'AND' specification, it will validate
+    // correctly as long as we specify both parts
+    var whitelistSPDX = '(' + opts.licenses.filter(spdx.valid).join(' OR ') + ')';
     
     var whitelistPackages = opts.packages.reduce(function (acc, cur) {
         var parsed = npa(cur);
@@ -20,7 +57,7 @@ module.exports = function (rootDir, opts, cb) {
     
     
     nlf.find({
-        directory: __dirname,
+        directory: rootDir,
         depth: 0
     }, function (err, data) {
         if (err) { cb(err); return; }
@@ -36,6 +73,7 @@ module.exports = function (rootDir, opts, cb) {
 
         if (data.length === 0) {
             cb(new Error('NLF found no licenses'));
+            return;
         }
         
         // nlf's return data sucks, and the standard formatter does a lot more than just making it pretty
@@ -44,16 +82,30 @@ module.exports = function (rootDir, opts, cb) {
             if (err) { cb(err); return; }
             
             var re = new RegExp(/(.*?@\d+\.[^ ]+) \[license\(s\): (.*)\]$/mg),
-                match, candidates = [ ];
+                match, packages = [ ];
             
             while (( match = re.exec(output) )) {
-                candidates.push(match);
+                packages.push(match);
             }
             
-            candidates.forEach(function (match) {
+            packages.forEach(function (match) {
                 // get the first license in the whitelist that applies to this package
+                
                 var license = match[2].split(', ').reduce(function (acc, cur) {
-                    return acc || (cur.toLowerCase() in whitelistLicenses ? cur : null);
+                    if (acc) { return acc; }
+                    
+                    // if the license from the file is a valid spdx expression,
+                    // compare it against our spdx whitelist expression
+                    if (spdx.valid(cur) && spdx.valid(whitelistSPDX) && spdx.satisfies(cur, whitelistSPDX)) {
+                        return cur;
+                    }
+                    
+                    // otherwise do a simple string comparison
+                    if (cur.toLowerCase() in whitelistLicenses) {
+                        return cur;
+                    }
+                    
+                    return null;
                 }, null);
                 
                 if (license !== null) {
@@ -67,7 +119,7 @@ module.exports = function (rootDir, opts, cb) {
                 if (parsed.spec && parsed.name in whitelistPackages) {
                     var target = whitelistPackages[parsed.name];
                     if (semver.satisfies(parsed.spec, target.spec)) {
-                        PACKAGES[match[1]] = 'Whitelisted: ' + (target.rawSpec || '*');
+                        PACKAGES[match[1]] = format('%s (exception: %s)', match[2], target.raw);
                         return;
                     }
                 }
@@ -78,7 +130,7 @@ module.exports = function (rootDir, opts, cb) {
             
             cb(null, {
                 packages: PACKAGES,
-                licenses: LICENSES,
+                licenses: Object.keys(LICENSES).sort(stringsort),
                 invalids: INVALIDS
             });
         });
