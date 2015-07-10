@@ -2,8 +2,10 @@
 
 'use strict';
 
+var cmd = require('path').basename(process.argv[1]);
+
 var yargs = require('yargs')
-    .usage('Usage: $0 [dirname] [options]')
+    .usage('Usage: '+cmd+' [dirname] [options]')
     .boolean('h')
     .alias('h', 'help')
     .describe('h', 'Show help.')
@@ -19,12 +21,12 @@ var yargs = require('yargs')
     .describe('allow-licenses', 'A list of licenses to allow. Validation will fail if a package is present that is not licensed under any of the licenses in this list.')
     .array('allow-packages')
     .describe('allow-packages', 'A list of packages to allow. Can be used to allow packages for which the license is not detected correctly (can happen with old package.json formats). Optionally may use package.json-style semver directives to match a version or range of versions.')
-    .example('$0 ~/project --allow-licenses WTFPL ISC MIT', 'Allow the WTFPL, ISC, and MIT licenses.')
-    .example('$0 ~/project --allow-packages convict', 'Allow the package \'convict\'.')
-    .example('$0 ~/project --allow-packages pg@^3.6.0', 'Allow the package \'pg\' (3.6.0 and up, but not 4.0.0 or higher).')
+    .example(cmd+' ~/project --allow-licenses WTFPL ISC MIT', 'Allow the WTFPL, ISC, and MIT licenses.')
+    .example(cmd+' ~/project --allow-packages convict', 'Allow the package \'convict\'.')
+    .example(cmd+' ~/project --allow-packages pg@^3.6.0', 'Allow the package \'pg\' (3.6.0 and up, but not 4.0.0 or higher).')
 ;
 
-yargs.wrap(Math.max(120), yargs.terminalWidth());
+yargs.wrap(Math.max(140), yargs.terminalWidth());
 
 var argv = yargs.argv;
 
