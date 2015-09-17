@@ -75,7 +75,8 @@ module.exports = function (rootDir, opts, cb) {
     
     nlf.find({
         directory: rootDir,
-        depth: 0
+        depth: typeof opts.depth === 'undefined' ? 1 : opts.depth,
+        production: typeof opts.production === 'undefined' ? false : opts.production
     }, function (err, data) {
         if (err) { cb(err); return; }
         
