@@ -17,6 +17,13 @@ var yargs = require('yargs')
     .describe('v', 'Detailed list of package licenses.')
     .nargs('dir', 1)
     .describe('dir', 'Base directory of package to validate. Defaults to current working directory.')
+    .default('d', 1)
+    .alias('d', 'depth')
+    .describe('d', 'How deep to traverse packages where 0 is the current package.json only.')
+    .boolean('production')
+    .alias('p', 'production')
+    .default('p', false)
+    .describe('p', 'Only traverse dependencies, no dev-dependencies.')
     .array('allow-licenses')
     .describe('allow-licenses', 'A list of licenses to allow. Validation will fail if a package is present that is not licensed under any of the licenses in this list.')
     .array('allow-packages')
@@ -49,7 +56,9 @@ function stringsort(a, b) {
 
 require('./index')(DIR, {
     licenses: argv['allow-licenses'] || [ ],
-    packages: argv['allow-packages'] || [ ]
+    packages: argv['allow-packages'] || [ ],
+    depth: argv['depth'],
+    production: argv['production']
 }, function (err, res) {
     if (err) {
         console.error('\nError: %s\n', err.message);

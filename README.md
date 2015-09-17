@@ -33,6 +33,8 @@ Courtesy of [yargs](https://www.npmjs.com/packages/yargs):
       -q, --quiet       Don't output anything.                                                                                         [boolean]
       -v, --verbose     Detailed list of package licenses.                                                                             [boolean]
       --dir             Base directory of package to validate. Defaults to current working directory.
+      -d, --depth       How deep to traverse packages where 0 is the current package.json only.                                     [default: 1]
+      -p, --production  Only traverse dependencies, no dev-dependencies.                                              [boolean] [default: false]
       --allow-licenses  A list of licenses to allow. Validation will fail if a package is present that is not licensed under any of the licenses
                         in this list.                                                                                                    [array]
       --allow-packages  A list of packages to allow. Can be used to allow packages for which the license is not detected correctly (can happen
