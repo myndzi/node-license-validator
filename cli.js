@@ -18,11 +18,19 @@ var yargs = require('yargs')
     .nargs('dir', 1)
     .describe('dir', 'Base directory of package to validate. Defaults to current working directory.')
     .boolean('deep')
+    .alias('d', 'deep')
     .describe('deep', 'Perform a deep search against all sub-dependencies.')
+    .default('deep', false)
+    .boolean('l', 'list-licenses')
     .boolean('list-licenses')
     .describe('list-licenses', 'Don\'t validate; just list the licenses in use.')
     .boolean('warn')
     .describe('warn', 'Only print invalid licenses, don\'t exit with error')
+    .default('warn', false)
+    .boolean('production')
+    .alias('p', 'production')
+    .describe('production', 'Only traverse dependencies, no dev-dependencies')
+    .default('p', false)
     .array('allow-licenses')
     .describe('allow-licenses', 'A list of licenses to allow. Validation will fail if a package is present that is not licensed under any of the licenses in this list.')
     .array('allow-packages')
@@ -57,7 +65,8 @@ require('./index')(DIR, {
     licenses: argv['allow-licenses'] || [ ],
     packages: argv['allow-packages'] || [ ],
     listOnly: !!argv['list-licenses'],
-    deep: !!argv['deep']
+    deep: !!argv['deep'],
+    production: argv['production']
 }, function (err, res) {
     if (err) {
         console.error('\nError: %s\n', err.message);

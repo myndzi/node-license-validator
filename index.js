@@ -80,7 +80,8 @@ module.exports = function (rootDir, opts, cb) {
     
     nlf.find({
         directory: rootDir,
-        depth: opts.deep ? Infinity : 0
+        depth: opts.deep ? Infinity : 0,
+        production: !!opts.production
     }, function (err, data) {
         if (err) { cb(err); return; }
         

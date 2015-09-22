@@ -33,11 +33,15 @@ Courtesy of [yargs](https://www.npmjs.com/packages/yargs):
       -q, --quiet       Don't output anything.                                                                                         [boolean]
       -v, --verbose     Detailed list of package licenses.                                                                             [boolean]
       --dir             Base directory of package to validate. Defaults to current working directory.
+      --list-licenses   Don't validate; just list the licenses in use.                                                                 [boolean]
+      --warn            Only print invalid licenses, don't exit with error                                            [boolean] [default: false]
       --allow-licenses  A list of licenses to allow. Validation will fail if a package is present that is not licensed under any of the licenses
                         in this list.                                                                                                    [array]
       --allow-packages  A list of packages to allow. Can be used to allow packages for which the license is not detected correctly (can happen
                         with old package.json formats). Optionally may use package.json-style semver directives to match a version or range of
                         versions.                                                                                                        [array]
+      -d, --deep        Perform a deep search against all sub-dependencies.                                           [boolean] [default: false]
+      -p, --production  Only traverse dependencies, no dev-dependencies                                               [boolean] [default: false]
 
     Examples:
       node-license-validator ~/project --allow-licenses WTFPL ISC MIT  Allow the WTFPL, ISC, and MIT licenses.
