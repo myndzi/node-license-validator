@@ -17,6 +17,12 @@ var yargs = require('yargs')
     .describe('v', 'Detailed list of package licenses.')
     .nargs('dir', 1)
     .describe('dir', 'Base directory of package to validate. Defaults to current working directory.')
+    .boolean('deep')
+    .describe('deep', 'Perform a deep search against all sub-dependencies.')
+    .boolean('list-licenses')
+    .describe('list-licenses', 'Don\'t validate; just list the licenses in use.')
+    .boolean('warn')
+    .describe('warn', 'Only print invalid licenses, don\'t exit with error')
     .array('allow-licenses')
     .describe('allow-licenses', 'A list of licenses to allow. Validation will fail if a package is present that is not licensed under any of the licenses in this list.')
     .array('allow-packages')
@@ -36,7 +42,7 @@ if (argv.h) {
 }
 
 var DIR = argv.dir || argv._[0] || process.cwd(),
-    QUIET = argv.q,
+    QUIET = !argv['list-licenses'] && argv.q,
     VERBOSE = !argv.q && argv.v;
 
 var log = (QUIET? function () { } : console.log);
@@ -49,7 +55,9 @@ function stringsort(a, b) {
 
 require('./index')(DIR, {
     licenses: argv['allow-licenses'] || [ ],
-    packages: argv['allow-packages'] || [ ]
+    packages: argv['allow-packages'] || [ ],
+    listOnly: !!argv['list-licenses'],
+    deep: !!argv['deep']
 }, function (err, res) {
     if (err) {
         console.error('\nError: %s\n', err.message);
@@ -59,19 +67,24 @@ require('./index')(DIR, {
     
     var LICENSES = res.licenses,
         PACKAGES = res.packages,
-        INVALIDS = res.invalids;
+        INVALIDS = res.invalids,
+        LIST_ONLY = !!argv['list-licenses'];
     
-    if (INVALIDS.length) {
+    if (!QUIET) {
+        var list = LICENSES.map(function (a) {
+            if (/,/.test(a)) { return '[' + a + ']'; }
+            return a;
+        }).join(', ');
+        log('Identified licenses: %s', list);
+    }
+    
+    if (!LIST_ONLY && INVALIDS.length) {
         INVALIDS.forEach(function (pkg) {
             var lic = PACKAGES[pkg];
             log('Invalid license: %s: %s', pkg, lic);
         });
-        process.exit(1);
+        process.exit(argv.warn ? 0 : 1);
     }
-    
-    if (QUIET) { return; }
-    
-    log('Identified licenses: %s', LICENSES);
     
     if (VERBOSE) {
         Object.keys(PACKAGES)
@@ -81,5 +94,7 @@ require('./index')(DIR, {
         });
     }
     
-    log('All licenses ok.');
+    if (!LIST_ONLY && !QUIET) {
+        log('All licenses ok.');
+    }
 });

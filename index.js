@@ -36,20 +36,25 @@ function validateArgs(rootDir, opts, cb) { // jshint maxcomplexity: 12
         return fail(new Error('nlf-validator: invalid options: ' + opts));
     }
     
+    if (!cb || typeof cb !== 'function') {
+        return fail(new Error('nlf-validator: no callback specified'));
+    }
+    
+    if (opts.listOnly) { return; }
+    
     if ( (!Array.isArray(opts.licenses) ? 0 : opts.licenses.length) +
          (!Array.isArray(opts.packages) ? 0 : opts.packages.length) === 0 )
     {
         return fail(new Error('nlf-validator: no licenses or packages specified'));
-    }
-    
-    if (!cb || typeof cb !== 'function') {
-        return fail(new Error('nlf-validator: no callback specified'));
     }
 }
 module.exports = function (rootDir, opts, cb) {
     if (validateArgs(rootDir, opts, cb)) { return; }
     
     var nlf = opts.__nlf || require('nlf');
+
+    opts.licenses = opts.licenses || [ ];
+    opts.packages = opts.packages || [ ];
     
     var whitelistLicenses = opts.licenses.reduce(function (acc, cur) {
         acc[cur.toLowerCase()] = cur;
@@ -75,7 +80,7 @@ module.exports = function (rootDir, opts, cb) {
     
     nlf.find({
         directory: rootDir,
-        depth: 0
+        depth: opts.deep ? Infinity : 0
     }, function (err, data) {
         if (err) { cb(err); return; }
         
@@ -134,13 +139,16 @@ module.exports = function (rootDir, opts, cb) {
                 var parsed = npa(match[1]);
                 
                 if (parsed.spec && parsed.name in whitelistPackages) {
-                    var target = whitelistPackages[parsed.name];
-                    if (semver.satisfies(parsed.spec, target.spec)) {
+                    var target = whitelistPackages[parsed.name],
+                        spec = parsed.spec.replace(/[-+].*/, ''); // semver won't match '*' against prerelease versions
+                    
+                    if (semver.satisfies(spec, target.spec)) {
                         PACKAGES[match[1]] = format('%s (exception: %s)', match[2], target.raw);
                         return;
                     }
                 }
 
+                LICENSES[match[2]] = (LICENSES[match[2]] || 0) + 1;
                 PACKAGES[match[1]] = match[2];
                 INVALIDS.push(match[1]);
             });

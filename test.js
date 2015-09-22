@@ -118,9 +118,21 @@ describe('NLF-validator', function () {
             { pkg: 'foo@1.0.0', licenses: [ 'GPL-2.0' ] }
         ], {
             licenses: [ 'MIT' ],
-            packages: [ 'foo@1.0.0' ]
+            packages: [ 'foo' ]
         }, {
-            packages: { 'foo@1.0.0': 'GPL-2.0 (exception: foo@1.0.0)' },
+            packages: { 'foo@1.0.0': 'GPL-2.0 (exception: foo)' },
+            licenses: [ ],
+            invalids: [ ]
+        });
+    });
+    it('should package-specific exceptions when no version is specified and package is a prerelease version', function () {
+        test([
+            { pkg: 'foo@1.0.0-sigh', licenses: [ 'GPL-2.0' ] }
+        ], {
+            licenses: [ 'MIT' ],
+            packages: [ 'foo' ]
+        }, {
+            packages: { 'foo@1.0.0-sigh': 'GPL-2.0 (exception: foo)' },
             licenses: [ ],
             invalids: [ ]
         });
@@ -149,6 +161,17 @@ describe('NLF-validator', function () {
             invalids: [ 'foo@1.2.0' ]
         });
     });
+    it('should succeed if no licenses/packages are given but listOnly option is true', function () {
+        test([
+            { pkg: 'foo@1.2.0', licenses: [ 'GPL-2.0' ] }
+        ], {
+            listOnly: true
+        }, {
+            packages: { 'foo@1.2.0': 'GPL-2.0' },
+            licenses: [ 'GPL-2.0' ],
+            invalids: [ 'foo@1.2.0' ]
+        });
+    });
     describe('Error cases', function () {
         it('should throw with an invalid directory', function () {
             (function () { validate(); }).should.throw(/invalid rootDir/);
@@ -162,14 +185,22 @@ describe('NLF-validator', function () {
         it('should throw with invalid options', function () {
             (function () { validate(__dirname); }).should.throw(/invalid options/);
         });
-        it('should throw with no licenses or packages specified', function () {
-            (function () { validate(__dirname, { }); }).should.throw(/no licenses or packages/);
-            (function () { validate(__dirname, { licenses: [ ] }); }).should.throw(/no licenses or packages/);
-            (function () { validate(__dirname, { packages: [ ] }); }).should.throw(/no licenses or packages/);
-            (function () { validate(__dirname, { licenses: [ ], packages: [ ] }); }).should.throw(/no licenses or packages/);
-        });
         it('should throw with no callback', function () {
             (function () { validate(__dirname, { licenses: [ 'foo' ] }); }).should.throw(/no callback specified/);
+        });
+        it('should throw with no licenses or packages specified', function () {
+            validate(__dirname, { }, function (err) {
+                err.should.match(/no licenses or packages/);
+            });
+            validate(__dirname, { licenses: [ ] }, function (err) {
+                err.should.match(/no licenses or packages/);
+            });
+            validate(__dirname, { packages: [ ] }, function (err) {
+                err.should.match(/no licenses or packages/);
+            });
+            validate(__dirname, { licenses: [ ], packages: [ ] }, function (err) {
+                err.should.match(/no licenses or packages/);
+            });
         });
         it('should call the callback with errors if one exists', function () {
             validate(null, null, function (err) {
@@ -253,7 +284,7 @@ describe('NLF-validator', function () {
                 done();
             });
         });
-        it('sould successfully validate this package', function (done) {
+        it('should successfully validate this package', function (done) {
             validate(__dirname, {
                 licenses: [ 'ISC', 'MIT', 'JSON', 'BSD-3-Clause' ],
                 packages: [ ]
@@ -262,6 +293,23 @@ describe('NLF-validator', function () {
                     invalids: [ ]
                 });
                 done();
+            });
+        });
+        it('should perform a deep search', function (done) {
+            var shallow, deep;
+            validate(__dirname, {
+                listOnly: true
+            }, function (err, res) {
+                shallow = Object.keys(res.packages);
+                
+                validate(__dirname, {
+                    listOnly: true,
+                    deep: true
+                }, function (err, res) {
+                    deep = Object.keys(res.packages);
+                    deep.length.should.be.above(shallow.length);
+                    done();
+                });
             });
         });
     });
