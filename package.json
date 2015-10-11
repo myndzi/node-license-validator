@@ -32,7 +32,7 @@
     "npm-package-arg": "^4.0.1",
     "semver": "^4.3.6",
     "spdx": "^0.4.1",
-    "yargs": "^3.15.0"
+    "yargs": "^3.27.0"
   },
   "devDependencies": {
     "istanbul": "^0.3.17",
