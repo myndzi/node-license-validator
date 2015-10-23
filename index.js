@@ -51,6 +51,8 @@ function validateArgs(rootDir, opts, cb) { // jshint maxcomplexity: 12
 module.exports = function (rootDir, opts, cb) {
     if (validateArgs(rootDir, opts, cb)) { return; }
     
+    var warn = opts.warn || function () { };
+    
     var nlf = opts.__nlf || require('nlf');
 
     opts.licenses = opts.licenses || [ ];
@@ -73,7 +75,11 @@ module.exports = function (rootDir, opts, cb) {
     
     var whitelistPackages = opts.packages.reduce(function (acc, cur) {
         var parsed = npa(cur);
-        acc[parsed.name] = parsed;
+        var pkg = parsed.name;
+        if (acc.hasOwnProperty(pkg)) {
+            warn(pkg + ' is specified more than once in allowed packages. Use the SPDX `||` operator to specify multiple versions of a single package.');
+        }
+        acc[pkg] = parsed;
         return acc;
     }, { });
     
@@ -105,7 +111,7 @@ module.exports = function (rootDir, opts, cb) {
             if (err) { cb(err); return; }
             
             var re = new RegExp(/(.*?@\d+\.[^ ]+) \[license\(s\): (.*)\]$/mg),
-                match, packages = [ ];
+                match, packages = [ ], seenPackages = { };
             
             while (( match = re.exec(output) )) {
                 packages.push(match);
@@ -113,6 +119,9 @@ module.exports = function (rootDir, opts, cb) {
             
             packages.forEach(function (match) {
                 // get the first license in the whitelist that applies to this package
+                
+                var pkgName = npa(match[1]).name.toLowerCase();
+                seenPackages[pkgName] = 1;
                 
                 var license = match[2].split(', ').reduce(function (acc, cur) {
                     if (acc) { return acc; }
@@ -153,6 +162,15 @@ module.exports = function (rootDir, opts, cb) {
                 PACKAGES[match[1]] = match[2];
                 INVALIDS.push(match[1]);
             });
+            
+            var unseenPackages = Object.keys(whitelistPackages).reduce(function (acc, cur) {
+                if (!seenPackages[cur]) { acc.push(cur); }
+                return acc;
+            }, [ ]);
+            
+            if (unseenPackages.length) {
+                warn('Packages were listed as exceptions but not found in the project: ' + unseenPackages.join(', '));
+            }
             
             cb(null, {
                 packages: PACKAGES,

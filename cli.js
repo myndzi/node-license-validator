@@ -64,12 +64,15 @@ function stringsort(a, b) {
     return 0;
 }
 
+var warn = QUIET ? function () { } : console.warn.bind(console, 'WARN:');
+
 require('./index')(DIR, {
     licenses: argv['allow-licenses'] || [ ],
     packages: argv['allow-packages'] || [ ],
     listOnly: !!argv['list-licenses'],
     deep: !!argv['deep'],
-    production: argv['production']
+    production: argv['production'],
+    warn: warn
 }, function (err, res) {
     if (err) {
         console.error('\nError: %s\n', err.message);

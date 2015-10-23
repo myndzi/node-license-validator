@@ -172,6 +172,42 @@ describe('NLF-validator', function () {
             invalids: [ 'foo@1.2.0' ]
         });
     });
+    it('should warn on duplicate whitelisted packages', function (done) {
+        var warn = function (str) {
+            str.should.match(/specified more than once/);
+            done();
+        };
+        
+        test([
+            { pkg: 'foo@1.0.0', licenses: [ 'GPL-2.0' ] }
+        ], {
+            licenses: [ 'MIT' ],
+            packages: [ 'foo', 'foo' ],
+            warn: warn
+        }, {
+            packages: { 'foo@1.0.0': 'GPL-2.0 (exception: foo)' },
+            licenses: [ ],
+            invalids: [ ]
+        });
+    });
+    it('should warn on unnecessarily whitelisted packages', function (done) {
+        var warn = function (str) {
+            str.should.match(/not found in the project/);
+            done();
+        };
+        
+        test([
+            { pkg: 'foo@1.0.0', licenses: [ 'GPL-2.0' ] }
+        ], {
+            licenses: [ 'MIT' ],
+            packages: [ 'foo', 'bar' ],
+            warn: warn
+        }, {
+            packages: { 'foo@1.0.0': 'GPL-2.0 (exception: foo)' },
+            licenses: [ ],
+            invalids: [ ]
+        });
+    });
     describe('Error cases', function () {
         it('should throw with an invalid directory', function () {
             (function () { validate(); }).should.throw(/invalid rootDir/);
@@ -296,6 +332,8 @@ describe('NLF-validator', function () {
             });
         });
         it('should perform a deep search', function (done) {
+            this.timeout(10000);
+          
             var shallow, deep;
             validate(__dirname, {
                 listOnly: true
