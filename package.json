@@ -1,6 +1,6 @@
 {
   "name": "node-license-validator",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Validate the licenses of your dependencies against a list",
   "main": "index.js",
   "scripts": {
