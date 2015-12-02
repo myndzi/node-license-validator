@@ -2,7 +2,8 @@
 
 var fs = require('fs'),
     npa = require('npm-package-arg'),
-    spdx = require('spdx'),
+    satisfies = require('spdx-satisfies'),
+    validate = require('spdx-expression-validate'),
     semver = require('semver'),
     format = require('util').format;
 
@@ -71,7 +72,7 @@ module.exports = function (rootDir, opts, cb) {
     // we build a string like (MIT OR ISC OR JSON OR BSD-3-Clause) with all the licenses
     // we have deemed acceptable; if a package has an 'AND' specification, it will validate
     // correctly as long as we specify both parts
-    var whitelistSPDX = '(' + opts.licenses.filter(spdx.valid).join(' OR ') + ')';
+    var whitelistSPDX = '(' + opts.licenses.filter(validate).join(' OR ') + ')';
     
     var whitelistPackages = opts.packages.reduce(function (acc, cur) {
         var parsed = npa(cur);
@@ -128,7 +129,7 @@ module.exports = function (rootDir, opts, cb) {
                     
                     // if the license from the file is a valid spdx expression,
                     // compare it against our spdx whitelist expression
-                    if (spdx.valid(cur) && spdx.valid(whitelistSPDX) && spdx.satisfies(cur, whitelistSPDX)) {
+                    if (validate(cur) && validate(whitelistSPDX) && satisfies(cur, whitelistSPDX)) {
                         return cur;
                     }
                     
