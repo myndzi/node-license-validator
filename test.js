@@ -16,7 +16,7 @@ function test(packages, opts, match) {
                 var pkgstr = packages.map(function (def) {
                     return format('%s [license(s): %s]', def.pkg, def.licenses.join(', '));
                 }).join('\n');
-                
+
                 cb(null, pkgstr);
             }
         }
@@ -177,7 +177,7 @@ describe('NLF-validator', function () {
             str.should.match(/specified more than once/);
             done();
         };
-        
+
         test([
             { pkg: 'foo@1.0.0', licenses: [ 'GPL-2.0' ] }
         ], {
@@ -195,7 +195,7 @@ describe('NLF-validator', function () {
             str.should.match(/not found in the project/);
             done();
         };
-        
+
         test([
             { pkg: 'foo@1.0.0', licenses: [ 'GPL-2.0' ] }
         ], {
@@ -245,7 +245,7 @@ describe('NLF-validator', function () {
         });
         it('should pass on errors from nlf.find', function () {
             var err = new Error();
-            
+
             test([
                 { pkg: 'foo@1.0.0', licenses: [ ] }
             ], {
@@ -268,7 +268,7 @@ describe('NLF-validator', function () {
             }, function (err, res) {
                 err.should.match(/NLF returned invalid data/);
             });
-            
+
             test([
                 { pkg: 'foo@1.0.0', licenses: [ ] }
             ], {
@@ -294,7 +294,7 @@ describe('NLF-validator', function () {
         });
         it('should pass on errors from nlf.standardFormatter.render', function () {
             var err = new Error();
-            
+
             test([
                 { pkg: 'foo@1.0.0', licenses: [ ] }
             ], {
@@ -321,6 +321,7 @@ describe('NLF-validator', function () {
             });
         });
         it('should successfully validate this package', function (done) {
+            this.timeout(10000);
             validate(__dirname, {
                 licenses: [ 'ISC', 'MIT', 'JSON', 'BSD-3-Clause' ],
                 packages: [ ]
@@ -333,13 +334,13 @@ describe('NLF-validator', function () {
         });
         it('should perform a deep search', function (done) {
             this.timeout(10000);
-          
+
             var shallow, deep;
             validate(__dirname, {
                 listOnly: true
             }, function (err, res) {
                 shallow = Object.keys(res.packages);
-                
+
                 validate(__dirname, {
                     listOnly: true,
                     deep: true
