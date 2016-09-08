@@ -70,8 +70,8 @@ require('./index')(DIR, {
     licenses: argv['allow-licenses'] || [ ],
     packages: argv['allow-packages'] || [ ],
     listOnly: !!argv['list-licenses'],
-    deep: !!argv['deep'],
-    production: argv['production'],
+    deep: !!argv.deep,
+    production: argv.production,
     warn: warn
 }, function (err, res) {
     if (err) {

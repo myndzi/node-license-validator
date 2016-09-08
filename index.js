@@ -80,6 +80,9 @@ module.exports = function (rootDir, opts, cb) {
         if (acc.hasOwnProperty(pkg)) {
             warn(pkg + ' is specified more than once in allowed packages. Use the SPDX `||` operator to specify multiple versions of a single package.');
         }
+        if (parsed.rawSpec === '') {
+          parsed.spec = '*';
+        }
         acc[pkg] = parsed;
         return acc;
     }, { });
@@ -108,7 +111,7 @@ module.exports = function (rootDir, opts, cb) {
         
         // nlf's return data sucks, and the standard formatter does a lot more than just making it pretty
         // so instead we just call the formatter and parse the return data
-        nlf.standardFormatter.render(data, function (err, output) {
+        nlf.standardFormatter.render(data, {}, function (err, output) {
             if (err) { cb(err); return; }
             
             var re = new RegExp(/(.*?@\d+\.[^ ]+) \[license\(s\): (.*)\]$/mg),

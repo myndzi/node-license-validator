@@ -12,7 +12,7 @@ function test(packages, opts, match) {
     opts.__nlf = opts.__nlf || {
         find: function (opts, cb) { cb(null, packages); },
         standardFormatter: {
-            render: function (data, cb) {
+            render: function (data, opts, cb) {
                 var pkgstr = packages.map(function (def) {
                     return format('%s [license(s): %s]', def.pkg, def.licenses.join(', '));
                 }).join('\n');
@@ -302,7 +302,7 @@ describe('NLF-validator', function () {
                 __nlf: {
                     find: function (opts, cb) { cb(null, [ 'foo' ]); },
                     standardFormatter: {
-                        render: function (data, cb) { cb(err); }
+                        render: function (data, opts, cb) { cb(err); }
                     }
                 }
             }, function (_err, res) {
