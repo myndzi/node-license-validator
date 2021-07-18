@@ -43,7 +43,7 @@ var yargs = require('yargs')
     .example(cmd+' ~/project --allow-packages pg@^3.6.0', 'Allow the package \'pg\' (3.6.0 and up, but not 4.0.0 or higher).')
 ;
 
-yargs.wrap(Math.max(140), yargs.terminalWidth());
+yargs.wrap(Math.max(140, yargs.terminalWidth()));
 
 var argv = yargs.argv;
 

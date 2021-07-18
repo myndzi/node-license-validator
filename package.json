@@ -4,7 +4,7 @@
   "description": "Validate the licenses of your dependencies against a list",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --bail test.js",
+    "test": "mocha --bail test.js test-cli.js",
     "report": "istanbul cover -x test.js -x node_modules node_modules/.bin/_mocha -- -u bdd -R spec --bail test.js;jshint index.js cli.js",
     "lint": "jshint index.js cli.js"
   },
