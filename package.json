@@ -29,7 +29,7 @@
   "homepage": "https://github.com/myndzi/node-license-validator#readme",
   "dependencies": {
     "nlf": "^2.1.1",
-    "npm-package-arg": "^8.1.5",
+    "npm-package-arg": "^9.0.2",
     "semver": "^7.3.5",
     "spdx-expression-validate": "^2.0.0",
     "spdx-satisfies": "^5.0.1",
