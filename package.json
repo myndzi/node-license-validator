@@ -30,7 +30,7 @@
   "dependencies": {
     "nlf": "^2.1.1",
     "npm-package-arg": "^8.1.5",
-    "semver": "^7.3.5",
+    "semver": "^7.3.8",
     "spdx-expression-validate": "^2.0.0",
     "spdx-satisfies": "^5.0.1",
     "yargs": "^17.2.1"
