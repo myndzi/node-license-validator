@@ -33,7 +33,7 @@
     "semver": "^7.3.5",
     "spdx-expression-validate": "^2.0.0",
     "spdx-satisfies": "^5.0.1",
-    "yargs": "^17.2.1"
+    "yargs": "^17.7.1"
   },
   "devDependencies": {
     "istanbul": "^0.4.5",
