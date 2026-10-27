@@ -1,3 +1,7 @@
+# Archived
+
+Legacy / unused
+
 # Node-license-validator
 
 This module is a programmatic and command line tool to help you validate the licenses of your dependencies against an allowed list. It is suitable for use in a build process. It utilizes [nlf](https://www.npmjs.com/packages/nlf), [semver](https://www.npmjs.com/packages/semver), and [spdx](https://www.npmjs.com/packages/spdx).
